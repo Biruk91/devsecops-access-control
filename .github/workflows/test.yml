@@ -36,7 +36,7 @@ jobs:
       - name: Install readiness checker dependencies
         run: |
           cd readiness-check
-          npm ci
+          npm install
           cd ..
 
       - name: Run Production Readiness Check
