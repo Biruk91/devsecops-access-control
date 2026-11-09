@@ -167,12 +167,21 @@ function getPayments() {
   return payments;
 }
 
+function updateUserRole(id, newRole) {
+  const user = users.find((u) => u.id === id);
+  if (!user) return null;
+  const previousRole = user.role;
+  user.role = newRole;
+  return { user, previousRole };
+}
+
 module.exports = {
   users,
   DUMMY_HASH,
   findUserByEmail,
   findUserById,
   getAllUsersSafe,
+  updateUserRole,
   findOrderById,
   getOrders,
   createOrder,
