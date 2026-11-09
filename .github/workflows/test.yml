@@ -32,3 +32,12 @@ jobs:
           JWT_ISSUER: "dinedesk-api"
           JWT_AUDIENCE: "dinedesk-client"
         run: npm test
+
+      - name: Install readiness checker dependencies
+        run: |
+          cd readiness-check
+          npm install
+          cd ..
+
+      - name: Run Production Readiness Check
+        run: npm run check

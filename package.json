@@ -5,7 +5,8 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "test": "jest --verbose --runInBand"
+    "test": "jest tests/dinedesk.test.js --verbose --runInBand",
+    "check": "node readiness-check/check-readiness.js ."
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
