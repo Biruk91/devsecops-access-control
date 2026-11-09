@@ -3,6 +3,9 @@ node_modules/
 .env.*
 !.env.example
 coverage/
+backups/
+*.dump
+*.sha256
 
 # Assignment answers file (keep local only)
 assignment7-answers.*
