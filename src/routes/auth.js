@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const config = require("../config");
 const { findUserByEmail, DUMMY_HASH } = require("../data");
+const { logSecurityEvent } = require("../events");
 
 const router = express.Router();
 
@@ -16,9 +17,22 @@ router.post("/login", async (req, res) => {
   const passwordMatch = await bcrypt.compare(password || "", hashToCompare);
 
   if (!user || !passwordMatch) {
+    // Record login failure: log userId for known user, or accountExists: false without typed email
+    logSecurityEvent(
+      req,
+      "login_failed",
+      user ? { userId: user.id } : { accountExists: false }
+    );
     // Single generic error for unknown email or wrong password
     return res.status(401).json({ error: "Invalid email or password" });
   }
+
+  // Record successful login
+  logSecurityEvent(req, "login_succeeded", {
+    userId: user.id,
+    role: user.role,
+    branch: user.branchId,
+  });
 
   // Issue token with minimal claims (sub only), short expiry (15m), issuer, and audience
   // Completely ignores any role or branch sent in the request body

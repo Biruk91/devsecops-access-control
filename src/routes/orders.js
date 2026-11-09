@@ -3,6 +3,7 @@ const authenticate = require("../middleware/authenticate");
 const { requirePermission } = require("../middleware/authorize");
 const { canAccessOrder } = require("../policies");
 const { getOrders, findOrderById, createOrder } = require("../data");
+const { logSecurityEvent } = require("../events");
 
 const router = express.Router();
 
@@ -19,9 +20,20 @@ router.get("/", authenticate, (req, res) => {
 router.get("/:id", authenticate, requirePermission("orders:read"), (req, res) => {
   const order = findOrderById(req.params.id);
 
-  // If order does not exist or caller cannot access this branch's order, return 404
-  // Returning 404 prevents IDOR enumeration: caller cannot tell whether order exists
-  if (!order || !canAccessOrder(req.user, order)) {
+  // If order does not exist at all, return 404
+  if (!order) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+
+  // Cross-branch access denied check
+  if (!canAccessOrder(req.user, order)) {
+    logSecurityEvent(req, "branch_access_denied", {
+      userId: req.user.id,
+      userBranch: req.user.branchId || "none",
+      targetBranch: order.branchId,
+      orderId: order.id,
+    });
+    // Returning 404 prevents IDOR enumeration: caller cannot tell whether order exists
     return res.status(404).json({ error: "Order not found" });
   }
 

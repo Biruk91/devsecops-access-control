@@ -1,0 +1,26 @@
+groups:
+  - name: dinedesk_security_alerts
+    rules:
+      # Alert Rule 1: Possible credential attack on DineDesk logins
+      - alert: DineDeskCredentialAttack
+        expr: sum(increase(security_events_total{event="login_failed"}[5m])) > 10
+        for: 1m
+        labels:
+          severity: warning
+          team: security-oncall
+        annotations:
+          summary: "Possible credential attack on DineDesk logins"
+          description: "More than 10 failed logins detected in a 5-minute window (current: {{ $value }})."
+          response: "Inspect security logs for top client IPs and targeted user accounts. Verify if any successful login followed; temporarily rate-limit or block offending source IP."
+
+      # Alert Rule 2: Someone probing across the branch boundary
+      - alert: CrossBranchProbingSpike
+        expr: sum(increase(security_events_total{event="branch_access_denied"}[5m])) > 3
+        for: 1m
+        labels:
+          severity: critical
+          team: security-oncall
+        annotations:
+          summary: "Spike in cross-branch order access denials"
+          description: "More than 3 cross-branch order access attempts rejected in a 5-minute window (current: {{ $value }})."
+          response: "Identify user account attempting cross-branch queries via requestId and userId. Suspend user credentials immediately; contact branch operations manager to verify potential credential compromise."
