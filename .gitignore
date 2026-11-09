@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.*
+!.env.example
+coverage/
+
+# Assignment answers file (keep local only)
+assignment7-answers.*
